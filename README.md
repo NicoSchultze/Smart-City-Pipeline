@@ -1,4 +1,4 @@
-This pipeline project leverages different types of structured and unstructured data, which is then stored in Kafka and managed by Apache Zookeeper (controlling the Kafka brokers). 
+This pipeline project leverages generated vehicular, weather, emergency, gps and traffic data, which is then stored in Kafka and managed by Apache Zookeeper (controlling the Kafka brokers). 
 
 Nextly, there is a consumer with Apache Spark, that is listening to events from Kafka and takes in data, aggregates and processes it. This part is containerized by Docker. 
 
