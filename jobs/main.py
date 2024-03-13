@@ -3,7 +3,8 @@ import uuid
 
 from confluent_kafka import SerializingProducer
 import simplejson as json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, time
+import time
 import random
 
 LONDON_COORDINATES = { "latitude": 51.5074, "longitude": -0.1278 }
@@ -109,6 +110,25 @@ def simulate_vehicle_movement():
 
     return start_location
 
+def json_serializer(obj):
+    if isinstance(obj, uuid.UUID):
+        return str(obj)
+    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
+
+def delivery_report(err, msg):
+    if err is not None:
+        print(f'Message delivery failed: {err}')
+    else:
+        print(f'Message delivered to {msg.topic()} [{msg.partition()}]')
+def produce_data_to_kafka(producer, topic, data):
+    producer.produce(
+        topic,
+        key=str(data['id']),
+        value=json.dumps(data, default=json_serializer).encode('utf-8'),
+        on_delivery=delivery_report
+    )
+    producer.flush()
+
 def simulate_journey(producer, device_id):
     while True:
         vehicle_data = generate_vehicle_data(device_id)
@@ -117,7 +137,18 @@ def simulate_journey(producer, device_id):
         weather_data = generate_weather_data(device_id, vehicle_data['timestamp'], vehicle_data['location'])
         emergency_incident_data = generate_emergency_incident_data(device_id,  vehicle_data['timestamp'], vehicle_data['location'])
 
+        if (vehicle_data['location'][0] >= BIRMINGHAM_COORDINATES['latitude']
+        and vehicle_data['location'][1] <= BIRMINGHAM_COORDINATES['longitude']):
+            print('Vehicle has reached Birmingham. Simluation ending....')
+            break
 
+        produce_data_to_kafka(producer, VEHICLE_TOPIC, vehicle_data)
+        produce_data_to_kafka(producer, GPS_TOPIC, gps_data)
+        produce_data_to_kafka(producer, WEATHER_TOPIC, weather_data)
+        produce_data_to_kafka(producer, TRAFFIC_TOPIC, traffic_camera_data)
+        produce_data_to_kafka(producer, EMERGENCY_TOPIC, emergency_incident_data)
+
+        time.sleep(5)
 if __name__ == "__main__":
     # How Kafka is configured
     producer_config = {
