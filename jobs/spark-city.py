@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession, DataFrame
 from pyspark.sql.functions import from_json, col
-from pyspark.sql.types import StructType, StructField, StringType, TimestampType, DoubleType, IntegerType
+from pyspark.sql.types import StructType, StructField, StringType, TimestampType, IntegerType, DoubleType
 
 from config import configuration
 
@@ -18,10 +18,10 @@ def main():
                 'org.apache.hadoop.fs.s3a.SimpleAWSCredentialsProvider') \
         .getOrCreate()
 
-    # Adjust log level to minimize console output on executors
+    # Adjust the log level to minimize the console output on executors
     spark.sparkContext.setLogLevel('WARN')
 
-    # vehicle schema for db
+    # vehicle schema
     vehicleSchema = StructType([
         StructField("id", StringType(), True),
         StructField("deviceId", StringType(), True),
@@ -32,10 +32,10 @@ def main():
         StructField("make", StringType(), True),
         StructField("model", StringType(), True),
         StructField("year", IntegerType(), True),
-        StructField("fuelType", StringType(), True)
+        StructField("fuelType", StringType(), True),
     ])
 
-    # gps schema for db
+    # gpsSchema
     gpsSchema = StructType([
         StructField("id", StringType(), True),
         StructField("deviceId", StringType(), True),
@@ -45,7 +45,7 @@ def main():
         StructField("vehicleType", StringType(), True)
     ])
 
-    # traffic schema for db
+    # trafficSchema
     trafficSchema = StructType([
         StructField("id", StringType(), True),
         StructField("deviceId", StringType(), True),
@@ -55,7 +55,7 @@ def main():
         StructField("snapshot", StringType(), True)
     ])
 
-    # weather schema for db
+    # weatherSchema
     weatherSchema = StructType([
         StructField("id", StringType(), True),
         StructField("deviceId", StringType(), True),
@@ -69,7 +69,7 @@ def main():
         StructField("airQualityIndex", DoubleType(), True),
     ])
 
-    # emergency schema for db
+    # emergencySchema
     emergencySchema = StructType([
         StructField("id", StringType(), True),
         StructField("deviceId", StringType(), True),
@@ -78,7 +78,7 @@ def main():
         StructField("location", StringType(), True),
         StructField("timestamp", TimestampType(), True),
         StructField("status", StringType(), True),
-        StructField("description", StringType(), True)
+        StructField("description", StringType(), True),
     ])
 
     def read_kafka_topic(topic, schema):
@@ -108,7 +108,8 @@ def main():
     weatherDF = read_kafka_topic('weather_data', weatherSchema).alias('weather')
     emergencyDF = read_kafka_topic('emergency_data', emergencySchema).alias('emergency')
 
-    # join all the dfs with id and timestamp
+    # #join all the dfs with id and timestamp
+    # join
 
     query1 = streamWriter(vehicleDF, 's3a://spark-streaming-data/checkpoints/vehicle_data',
                           's3a://spark-streaming-data/data/vehicle_data')
@@ -120,6 +121,8 @@ def main():
                           's3a://spark-streaming-data/data/weather_data')
     query5 = streamWriter(emergencyDF, 's3a://spark-streaming-data/checkpoints/emergency_data',
                           's3a://spark-streaming-data/data/emergency_data')
+
+    query5.awaitTermination()
 
 
 if __name__ == "__main__":

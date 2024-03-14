@@ -57,18 +57,18 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_JMX_PORT: 9101
       KAFKA_JMX_HOSTNAME: localhost
-      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http:schema-registry:8081
+      KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL: http://schema-registry:8081
       CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS: broker:29092
       CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS: 1
       CONFLUENT_METRICS_ENABLE: 'false'
       CONFLUENT_SUPPORT_CUSTOMER_ID: 'anonymous'
-    networks:
-    - niconetwork
     healthcheck:
-      test: [ 'CMD', 'bash', '-c', "nc -z | nc localhost 9092" ]
+      test: [ 'CMD', 'bash', '-c', "nc -z localhost 9092" ]
       interval: 10s
       timeout: 5s
       retries: 5
+    networks:
+      - niconetwork
 
   spark-master:
     image: bitnami/spark:latest
@@ -85,10 +85,10 @@ services:
     <<: *spark-common
   spark-worker-2:
     <<: *spark-common
- # spark-worker-3:
- #   <<: *spark-common
- # spark-worker-4:
- #   <<: *spark-common
+#  spark-worker-3:
+#    <<: *spark-common
+#  spark-worker-4:
+#    <<: *spark-common
 
 networks:
   niconetwork:

@@ -11,8 +11,8 @@ LONDON_COORDINATES = {"latitude": 51.5074, "longitude": -0.1278}
 BIRMINGHAM_COORDINATES = {"latitude": 52.4862, "longitude": -1.8904}
 
 # Calculate movement increments
-LATITUDE_INCREMENT = (BIRMINGHAM_COORDINATES["latitude"] - LONDON_COORDINATES["latitude"]) / 100
-LONGITUDE_INCREMENT = (BIRMINGHAM_COORDINATES["longitude"] - LONDON_COORDINATES["longitude"]) / 100
+LATITUDE_INCREMENT = (BIRMINGHAM_COORDINATES['latitude'] - LONDON_COORDINATES['latitude']) / 100
+LONGITUDE_INCREMENT = (BIRMINGHAM_COORDINATES['longitude'] - LONDON_COORDINATES['longitude']) / 100
 
 # Environment Variables
 KAFKA_BOOTSTRAP_SERVERS = os.getenv('KAFKA_BOOTSTRAP_SERVERS', 'localhost:9092')
@@ -159,7 +159,7 @@ def simulate_journey(producer, device_id):
         produce_data_to_kafka(producer, TRAFFIC_TOPIC, traffic_camera_data)
         produce_data_to_kafka(producer, EMERGENCY_TOPIC, emergency_incident_data)
 
-        time.sleep(5)
+        time.sleep(0.5)
 
 
 if __name__ == "__main__":
@@ -167,16 +167,16 @@ if __name__ == "__main__":
     # How Kafka is configured
     producer_config = {
         'bootstrap.servers': KAFKA_BOOTSTRAP_SERVERS,
-        'error_cb': lambda err: print(f'Kafka error {err}')
+        'error_cb': lambda err: print(f'Kafka error: {err}')
     }
 
     producer = SerializingProducer(producer_config)
 
     try:
-        simulate_journey(producer, 'Vehicle-Nico-1')
+        simulate_journey(producer, 'Vehicle-Nico7')
 
     except KeyboardInterrupt:
         print('Simulation ended by the user')
 
     except Exception as e:
-        print(f'Unexpected error occured: {e}')
+        print(f'Unexpected error occurred: {e}')
